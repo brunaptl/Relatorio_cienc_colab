@@ -1,0 +1,10 @@
+poita,hidrofone,local,decimalLatitude,decimalLongitude,profundidade_m,deploy_date,hora,datalogger_code,logger_in,logger_out,referencia,ordem
+1,VR2W-137086,Forno,-22.966467,-42.007733,8,2024-02-18,11:18,21789903,02/02 10:10,18/02 12:01,naufragio_restaurante,2
+2,VR2W-137081,Forno,-22.967957,-42.007115,8,2024-01-25,10:11,NA,NA,NA,balsa_ricardo,3
+3,VR2W-137087,Forno,-22.9690508,-42.0059523,11,2024-01-25,09:41,21793663,01/02 16:23,18/02 11:01,balsa_paulinho,4
+4,VR2W-137079,Forno,-22.966517,-42.009650,6,2024-02-18,12:30,21789903,06/03 18:00,perdido,curva_chamine,1
+5,VR2W-137078,Forno,-22.970017,-42.004250,10,2024-02-02,10:30,21793663,11/03 09:30,,ponta_esquina,5
+6,VR2W-137088,Fortaleza,-22.969475,-42.011789,9,2024-03-11,10:55,21789897,06/03 16:19,,fortaleza,7
+7,VR2W-137082,Cardeiros,-22.967162,-42.00215,10,2024-03-11,10:00,21789898,11/03 10:00,,cardeiros,6
+8,VR2W-137077,Anjos,-22.978199,-42.016174,"6,7",2024-04-09,15:30,21789896,09/04 15:30,,anjos_dentro,8
+9,VR2W-137083,Anjos,-22.977733,-42.011367,13,2024-03-09,15:40,NA,NA,NA,anjos_fora,9
