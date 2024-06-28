@@ -1,0 +1,128 @@
+---
+title: "Telemetria passiva"
+date: "2023-04-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+
+```
+
+```{r primeiro, warning=FALSE}
+
+library(tidyverse)
+install.packages("leaflet")
+library(leaflet)
+library(dplyr)
+
+# install.packages("devtools")
+devtools::install_github("r-lib/conflicted")
+
+dados <- read.csv("VUE_Export_ALL_DETECTIONS_24062024.csv") %>% 
+  mutate(date_time = paste(Date, Time) %>% 
+           as.POSIXct())
+
+turtles <- read.csv("Telemetry_tags_seaturtles - tagged_seaturtles.csv", header = T)
+fish <- read.csv("Telemetry_tags_surgeonfishes - tagged_surgeonfishes.csv", header = T) 
+receptores <- read.csv("receptores.csv")
+tags <- bind_rows(select(fish, transmitter:species),
+                  select(turtles, transmitter:species)) %>% 
+  distinct()
+
+dados <- dados %>% 
+  left_join(tags) %>% 
+  left_join(receptores %>% 
+              select(hidrofone, referencia) %>% 
+              rename(Receiver = hidrofone)) %>% 
+  mutate(referencia = factor(referencia, levels = c("curva_chamine", "naufragio_restaurante", "balsa_ricardo", "balsa_paulinho", "ponta_esquina", "cardeiros", "fortaleza", "anjos_dentro", "anjos_fora")))
+
+
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+# checando deteccoes ao mesmo tempo em mais de um transmissor
+dados %>% 
+  pivot_wider(names_from = Receiver, values_from = transmitter) %>% 
+  data.frame() %>% 
+  head()
+
+# detecções por receptor
+dados %>% 
+  # mutate(dia = as.Date(date_time))
+  group_by(referencia, transmitter, Date, species) %>% 
+  summarise(pings = length(unique(date_time))) %>% 
+  ggplot(aes(x = referencia, y = pings, color = species)) +
+    geom_boxplot() +
+    theme_classic() +
+    theme(legend.position = "bottom",
+          legend.title = element_blank()) +
+    labs(y = "detecções (n)", x = "")
+
+
+# detecções por dia
+dados %>% 
+  group_by(Receiver, transmitter, Date, species) %>% 
+  summarise(pings = length(unique(Date))) %>% 
+  ggplot(aes(x = Date, y = pings, fill = species)) +
+    geom_bar(stat = "identity") +
+    theme_classic() +
+    facet_grid(Receiver ~.) +
+    theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+          legend.title = element_blank()) +
+    labs(y = "detecções (n)", x = "")
+
+
+# detecções por dia
+dados %>% 
+  group_by(Receiver, Transmitter, Date, species) %>% 
+  summarise(pings = length(unique(Date))) %>% 
+  ggplot(aes(x = Date, y = pings, fill = species)) +
+    geom_bar(stat = "identity") +
+    theme_classic() +
+    facet_wrap(transmitter ~ species) +
+    theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+          legend.title = element_blank()) +
+    labs(y = "detecções (n)", x = "")
+  
+```
+
+```{r}
+# mapa
+pings <- dados %>% 
+  group_by(Receiver, referencia, transmitter, Date, species) %>% 
+  summarise(deteccao = length(unique(Date))) %>% 
+  group_by(Receiver, referencia, transmitter, species) %>% 
+  summarise(ping = sum(deteccao)) %>% 
+  left_join(receptores %>% 
+              select(decimalLatitude, decimalLongitude, hidrofone) %>% 
+              rename(Receiver = hidrofone)) %>% 
+  data.frame()
+
+
+leaflet() %>% 
+  addTiles() %>%
+  addCircleMarkers(
+    data = pings,
+    lng = ~decimalLongitude,
+    lat = ~decimalLatitude,
+    radius = ~sqrt(ping),
+    stroke = FALSE, 
+    fillOpacity = 0.5
+  ) 
+
+```
+
+
