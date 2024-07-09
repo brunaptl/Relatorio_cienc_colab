@@ -8,21 +8,18 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-```{r}
-
-```
+## Dados telemetria
 
 ```{r primeiro, warning=FALSE}
 
 library(tidyverse)
-install.packages("leaflet")
+# install.packages("leaflet")
 library(leaflet)
 library(dplyr)
 
 # install.packages("devtools")
-devtools::install_github("r-lib/conflicted")
+# devtools::install_github("r-lib/conflicted")
+library(conflicted)
 
 dados <- read.csv("VUE_Export_ALL_DETECTIONS_24062024.csv") %>% 
   mutate(date_time = paste(Date, Time) %>% 
@@ -36,10 +33,11 @@ tags <- bind_rows(select(fish, transmitter:species),
   distinct()
 
 dados <- dados %>% 
-  left_join(tags) %>% 
-  left_join(receptores %>% 
-              select(hidrofone, referencia) %>% 
-              rename(Receiver = hidrofone)) %>% 
+  rename(transmitter = Transmitter) %>% 
+  dplyr::left_join(tags) %>%
+  left_join(receptores %>%
+              select(hidrofone, referencia) %>%
+              rename(Receiver = hidrofone)) %>%
   mutate(referencia = factor(referencia, levels = c("curva_chamine", "naufragio_restaurante", "balsa_ricardo", "balsa_paulinho", "ponta_esquina", "cardeiros", "fortaleza", "anjos_dentro", "anjos_fora")))
 
 
@@ -66,6 +64,7 @@ dados %>%
     geom_boxplot() +
     theme_classic() +
     theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
           legend.title = element_blank()) +
     labs(y = "detecções (n)", x = "")
 
@@ -86,7 +85,7 @@ dados %>%
 
 # detecções por dia
 dados %>% 
-  group_by(Receiver, Transmitter, Date, species) %>% 
+  group_by(Receiver, transmitter, Date, species) %>% 
   summarise(pings = length(unique(Date))) %>% 
   ggplot(aes(x = Date, y = pings, fill = species)) +
     geom_bar(stat = "identity") +
